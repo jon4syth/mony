@@ -61,21 +61,14 @@ defmodule Mony do
   def main([file_name]) do
     file_name
     |> convert_to_text()
-    |> read_in_text()
     |> parse_statement()
     |> output_as_csv()
   end
 
   defp convert_to_text(file_name) do
-    {"", 0} = System.cmd("pdftotext", ["-layout", file_name])
+    {pdf_content, 0} = System.cmd("pdftotext", ["-layout", file_name, "-"])
 
-    file_name
-  end
-
-  defp read_in_text(file_name) do
-    String.replace(file_name, ".pdf", ".txt")
-    |> File.read!()
-    |> String.split("\n")
+    pdf_content
   end
 
   # 7 states of parsing the pdf document are ordered as:
@@ -88,8 +81,9 @@ defmodule Mony do
   # 7. :ok
   # The states in which data is added to the state are 3 and 6
   defp parse_statement(pdf_content) do
-    Enum.reduce_while(
-      pdf_content,
+    pdf_content
+    |> String.split("\n")
+    |> Enum.reduce_while(
       {:searching_for_credit_title, %{credits: [], debits: []}},
       &parse_credits_and_debits/2
     )
