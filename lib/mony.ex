@@ -71,7 +71,11 @@ defmodule Mony do
   defparsec(:header, header)
   defparsec(:bank_event, bank_event)
 
-  def main([file_name]) do
+  def main(pdf_files) do
+    Enum.each(pdf_files, &process/1)
+  end
+
+  defp process(file_name) do
     file_name
     |> convert_to_text()
     |> parse_statement()
@@ -103,8 +107,8 @@ defmodule Mony do
   end
 
   def output_as_csv({:ok, result}) do
-    {:ok, io_credits} = File.open("credits.csv", [:write])
-    {:ok, io_debits} = File.open("debits.csv", [:write])
+    {:ok, io_credits} = File.open("credits.csv", [:append])
+    {:ok, io_debits} = File.open("debits.csv", [:append])
 
     IO.binwrite(
       io_credits,
