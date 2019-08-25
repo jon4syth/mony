@@ -33,11 +33,24 @@ defmodule Mony do
     |> ascii_string([?0..?9], 2)
     |> reduce({Enum, :join, []})
 
+  thousands =
+    ascii_string([?0..?9], max: 3)
+    |> ignore(string(","))
+    |> times(min: 0, max: 1)
+
+  before_decimal =
+    concat(
+      thousands,
+      ascii_string([?0..?9], max: 3)
+      |> times(min: 0, max: 1)
+    )
+
   amount =
-    times(integer(max: 3) |> ignore(string(",")), max: 1)
-    |> ascii_string([?0..?9], max: 3)
-    |> string(".")
-    |> ascii_string([?0..?9], 2)
+    concat(
+      before_decimal,
+      string(".")
+      |> ascii_string([?0..?9], 2)
+    )
     |> reduce({Enum, :join, []})
 
   # same as ascii_string([?\s..?~])
